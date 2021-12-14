@@ -1,0 +1,54 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf%}
+{% include "layout.html" %}
+
+{% block title %}
+    Project--Part1
+{% endblock %}
+
+{% block content %}
+<div class="container my-2">
+    {{wtf.quick_form(form)}}
+    <hr>
+    {% if session['startdate'] %}
+        StartDate : <strong>{{session['startdate']}}</strong>
+    {% else %}
+        
+    {% endif %}
+
+
+    {% if session['enddate'] %}
+        EndDate : <strong>{{session['enddate']}}</strong>
+    {% else %}
+        
+    {% endif %}
+
+ 
+    {% if session['airport_a'] %}
+        สนามบิน A : <strong>{{session['airport_a']}}</strong>
+    {% else %}
+        
+    {% endif %}
+
+
+    {% if session['airport_b'] %}
+        สนามบิน B : <strong>{{session['airport_b']}}</strong>
+    {% else %}
+        
+    {% endif %}
+
+
+    {% if session['level'] %}
+        ระดับ : <strong>{{session['level']}}</strong>
+    {% else %}
+        
+    {% endif %}
+
+
+    {% if session['inout'] %}
+        <strong>{{session['inout']}}</strong>
+    {% else %}
+        
+    {% endif %}
+</div>
+{% endblock %}

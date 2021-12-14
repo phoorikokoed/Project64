@@ -18,9 +18,7 @@ def import_data(groups,trafftype):
         return df
 
 '''
-def main():
-    sam_test = import_data("ขาเข้า","เที่ยวบินประจำภายในประเทศ")
-    return sam_test
+
 
 if __name__ == "__main__":
     main()

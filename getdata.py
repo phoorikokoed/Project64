@@ -18,8 +18,6 @@ def import_data(groups,trafftype):
         return df
 
 '''
-
-
 if __name__ == "__main__":
     main()
 '''

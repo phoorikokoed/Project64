@@ -9,21 +9,11 @@ from flask_bootstrap import Bootstrap
 from pymongo import MongoClient, mongo_client
 import pandas as pd
 import pymongo
-import getdata
+import getdata, makedatetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mykey'
 Bootstrap(app)
- #------------------------ อีกวิธีนึง -----------------------------------
-#app.config["MONGO_URI"] = "mongodb://localhost:27017/sample1"
-#mongo = PyMongo(app)
-'''
-mongodb_client = PyMongo(app, uri="mongodb://localhost:27017/sample1")
-db = mongodb_client.db
-app.config["MONGO_URI"] = "mongodb://localhost:27017/todo_db"
-mongodb_client = PyMongo(app)
-db = mongodb_client.db
-'''
 
 mongoClient = MongoClient('mongodb://localhost:27017')
 db = mongoClient.get_database('sample1')
@@ -84,22 +74,9 @@ def predict():
 
 @app.route('/test')
 def import_db():
-    '''
-    #test = mongo.db.database.find({"TraffTypeDescTH": 'เที่ยวบินประจำภายในประเทศ'})
-    #test = db.database.find()
-    #test = mongo.db.database.find({"TraffTypeDescTH": 'เที่ยวบินประจำภายในประเทศ'})
-    test = data_sample.find({"TraffTypeDescTH": 'เที่ยวบินประจำภายในประเทศ'})
-    #return render_template("index.html",online_users=online_users)
-    docs_list  = list(test)
-    df_list = pd.DataFrame(docs_list)
-    #return json.dumps(docs_list, default=json_util.default)
-    print("Kuyyyyyyyyyyyyyyy", test)
-    testhee = json.dumps(docs_list, default=str, ensure_ascii=False).encode('utf8')
-    return testhee
-    '''
     arr_test = getdata.import_data("ขาเข้า","เที่ยวบินประจำภายในประเทศ")
-    return render_template('test.html', tables=[arr_test.to_html(classes='test')]
-    ,titles = ['Df Test'])
+    #df_test = makedatetime.convertdatetime(arr_test)
+    return render_template('test.html', tables=[arr_test.to_html(classes='test')],titles = ['Df Test'])
     
 if __name__ == "__main__":
     app.run(port=80,debug=True)

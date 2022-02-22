@@ -1,0 +1,97 @@
+{% include "layout.html" %}
+
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Plotly Part 2</title>
+    <style>
+      .tab {
+          display: inline-block;
+          margin-left: 80px;
+      }
+      .tabspace {
+        display: inline-block;
+        margin-left: 15px;
+      }
+      .datespace {
+        display: inline-block;
+        margin-left: 95px;
+      }
+  </style>
+</head>
+<body scroll="no" style="overflow-x: hidden">
+
+    <div id='chart' class='chart'”></div>
+    <p align="center", style="color:#636EFA";><b>K = {{k_factor[0]}}</b>
+    <span class="tabspace", style="color:#EF553B";><b>K = {{k_factor[1]}}</span></b>
+    <span class="tabspace", style="color:#00CC96";><b>K = {{k_factor[2]}}</span></b>
+    <span class="tabspace", style="color:#AB63FA";><b>K = {{k_factor[3]}}</span></b>
+    <span class="tabspace", style="color:#FFA15A";><b>K = {{k_factor[4]}}</span></b></p>
+    <hr>
+    <h1> test</h1>
+
+    <div class="dropdown">
+      <form action="{{url_for('display2')}}" method = "post">
+      <button class="btn btn-secondary dropdown-toggle" type="button" name="start_date" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+        Start Date
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        {% for ld in label_date %}
+        <li><a class="dropdown-item" href="#">{{ld}}</a></li>
+        {% endfor %}
+      </ul>
+      <button class="btn btn-secondary dropdown-toggle" type="button" name="end_date" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+        End Date
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+        {% for ld in label_date %}
+        <li><a class="dropdown-item" href="#">{{ld}}</a></li>
+        {% endfor %}
+      </ul>
+      <button type="submit" class="btn btn-success btn-block btn-large">Submit</button>
+      <button type="reset" class="btn btn-danger btn-block btn-large">Reset</button>
+    </form>
+    </div>
+    <input type="date" id="fname" name="fname" onchange="update_graph(this.value)">
+    <input type="date" id="fname" name="ffname" onchange="update_graph(this.value)">
+
+    <div id='chart1' class='chart'”></div>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <script type='text/javascript'>
+      var graphs = {{graphJSON | safe}};
+      var config = {"displayModeBar": false};
+      Plotly.setPlotConfig(config);
+      Plotly.plot('chart',graphs,{});
+    </script>
+    <script type='text/javascript'>
+      var graphs1 = {{graphJSON1 | safe}};
+      var config = {"displayModeBar": false};
+      Plotly.setPlotConfig(config);
+      Plotly.plot('chart1',graphs1,{});
+
+    </script>
+    
+    <div class="container", align="margin-left">
+      <form action="{{url_for('display2')}}" method = "post">
+          <b>Start Date:</b><span class = "datespace"><b>End Date:</b></span><br>
+          <input type="date" name="startdate" required="required" />
+          <input type="date" name="enddate" required="required" /> <br><br>
+          <button type="submit" class="btn btn-success btn-block btn-large">Submit</button>
+          <button type="reset" class="btn btn-danger btn-block btn-large">Reset</button>
+      </form>
+    </div>
+</body>
+
+</html>
+
+{% endblock %}
+

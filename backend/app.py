@@ -41,6 +41,7 @@ def display1():
     if request.method == 'POST':
         date = request.form['date'] #This is a str type
         enddate = request.form['enddate'] #This is a str type
+        inout = request.form['inout']
 
     data = data_test
 
@@ -49,7 +50,8 @@ def display1():
     df_period = makedatetime.select_time(df,date,enddate)
 
     arr = clustering.convertdata(df_period)
-    cluster = clustering.get_k_value(arr)
+    #cluster = clustering.get_k_value(arr)
+    cluster = 4
     prediction = clustering.dtw_clustering(arr, cluster)
     df_ans = clustering.create_dataframe(df_period,arr,prediction)
 
@@ -65,7 +67,7 @@ def display1():
     color='date',
     facet_row = 'Cluster',labels={"index": "Hours"})
     
-    fig.update_layout(height=800,width=1600,showlegend=False, modebar_remove=True)
+    fig.update_layout(height=850,width=1600,showlegend=False, modebar_remove=True,title_text=f"Clustering {date} to {enddate}",title_x=0.5)
     fig.add_trace(go.Table(
     #columnorder = [1,2,3,4],
     #margin=dict(l=5,r=5,b=10,t=10),
@@ -84,7 +86,7 @@ def display1():
                  height = 25,
                  fill = dict(color=['rgb(235, 193, 238)', 'rgba(228, 222, 249, 0.65)']))
     ))
-    #fig.update_layout(margin=dict(l=5,r=100,b=10,t=10))
+    fig.update_layout(margin=dict(b=20,t=30))
     #fig_test = go.FigureWidget(data=[fig1]) 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     #graphJSON1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
@@ -145,7 +147,7 @@ def display2():
 
     fig1 = px.bar(data_frame = df_chart,
     x = 'date_and_time',
-    y = 'Passenger')
+    y = 'Passenger',labels={"date_and_time": "Date&Time"})
 
     fig1.add_scatter(x = df_chart['date_and_time'],
     y = df_chart['Capacity'],
@@ -154,34 +156,8 @@ def display2():
     name = "Capacity")
 
     label_date = df_chart.date.unique()
-    buttons = []
-    # button with one option for each 'special'
-    for s in df_chart['date'].unique():
-        buttons.append(dict(method='update',
-                            label=s,
-                            
-                            visible=True
-                            ))
 
-    fig1.update_layout(showlegend=False, 
-    updatemenus=[dict(
-                    active=0,
-                    type="dropdown",
-                    buttons=buttons,
-                    x = 0,
-                    y = 1.1,
-                    xanchor = 'left',
-                    yanchor = 'bottom'
-                ),
-                dict(
-                    active=0,
-                    type="dropdown",
-                    buttons=buttons,
-                    x = 0.07,
-                    y = 1.1,
-                    xanchor = 'left',
-                    yanchor = 'bottom')]
-    )
+    fig1.update_layout(showlegend=False, title_text=f"Graph from {startdate} to {enddate}",title_x=0.5)
 
     fig1.update_xaxes(type="date",calendar="thai",autorange=True)
 
@@ -196,6 +172,51 @@ def display2():
     graphJSON1 = graphJSON1)
     
     #return df_chart.to_html()
+
+@app.route('/callback', methods=['POST', 'GET'])
+def cb():
+    #return update_graph(request.args.get('data'))
+    #if request.method == 'POST':
+        #test = request.form['test']
+    start_date = request.args.get('data') #This is a str type
+        #end_date = request.form['end_date'] #This is a str type
+    end_date = request.args.get('data1')
+    #2019-04-02
+    #print('===============',type(test), start_date,end_date)
+    return update_graph(start_date,end_date)
+    
+def update_graph(startdate,enddate):
+
+    df_test = makedatetime.convertdate(data_test)
+    df_test = df_test.sort_index()
+    test_df = makedatetime.select_time(df_test,startdate,enddate)
+
+    test_df['AIR_TYPE'] = test_df.apply(lambda row: capacity_insert.format_airtype(row), axis=1)
+    test_df['Capacity'] = test_df.apply(lambda row: capacity_insert.insert_cap(row), axis=1)
+
+    df_chart = spill_f.resample_df(test_df)
+    df_chart = makedatetime.select_time(df_chart, startdate, enddate)
+    df_chart['date'] = [date.strftime("%Y-%m-%d") for date in df_chart.index.date]
+    df_chart = df_chart.reset_index()
+    df_chart = df_chart[df_chart.Passenger != 0]
+
+    fig1 = px.bar(data_frame = df_chart,
+    x = 'date_and_time',
+    y = 'Passenger',labels={"date_and_time": "Date&Time"})
+
+    fig1.update_layout(showlegend=False, title_text=f"Graph from {startdate} to {enddate}",title_x=0.5)
+
+    fig1.add_scatter(x = df_chart['date_and_time'],
+    y = df_chart['Capacity'],
+    mode="markers",
+    fillcolor = "red",
+    name = "Capacity")
+
+    fig1.update_xaxes(type="date")
+
+    graphJSON2 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON2
 
 @app.route('/predictpassenger', methods=["GET","POST"])
 def predict():

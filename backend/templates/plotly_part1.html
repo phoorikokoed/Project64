@@ -11,17 +11,16 @@
     <title>Plotly Part 1</title>
 </head>
 <style>
-  table, td, th {
-    border: 1px solid black;
+  table{
+    display: inline-block;
   }
-  
-  table {
-    border-collapse: collapse;
-    width: 50%;
-  }
-  </style>
+</style>
 <body>
-    <br><h2> Plotly Part1</h2>
+  <br><h2> Plotly Part1</h2>
+  <div>
+    <table style="float: left">
+      <tr>
+        <td>
     <div id='chart' class='chart'”></div>
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
     <script type='text/javascript'>
@@ -30,6 +29,15 @@
       Plotly.setPlotConfig(config);
       Plotly.plot('chart',graphs,{});
     </script>
+        </td>
+      </tr>
+    </table>
+    <table style="float: left">
+      <tr>
+        <td>Hello World</td>
+      </tr>
+    </table>
+  </div>
 
 </body>
 </html>

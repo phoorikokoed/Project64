@@ -11,7 +11,7 @@ from flask_bootstrap import Bootstrap
 from pymongo import MongoClient, mongo_client
 import pandas as pd
 import plotly
-from plotly.subplots import make_subplots
+import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.graph_objs import FigureWidget
@@ -25,7 +25,7 @@ Bootstrap(app)
 mongoClient = MongoClient('mongodb://localhost:27017')
 
 data_in = getdata.import_data("ขาเข้า")
-data_test = getdata.import_data("ขาเข้า")
+data_out = getdata.import_data("ขาออก")
 
 @app.route('/')
 def home():
@@ -43,16 +43,17 @@ def display1():
         enddate = request.form['enddate'] #This is a str type
         inout = request.form['inout']
 
-    data = data_test
+    data = data_in
 
     df = makedatetime.convertdatetime(data)
     df = df.sort_index()
     df_period = makedatetime.select_time(df,date,enddate)
 
     arr = clustering.convertdata(df_period)
-    #cluster = clustering.get_k_value(arr)
-    cluster = 4
+    cluster = clustering.get_k_value(arr)
+    #cluster = 4
     prediction = clustering.dtw_clustering(arr, cluster)
+    prediction += 1
     df_ans = clustering.create_dataframe(df_period,arr,prediction)
 
     df_ans_test = clustering.create_df(df_period,arr,prediction)
@@ -104,7 +105,15 @@ def display2():
         #test_type = request.form['type'] #This is a str type
         startdate = request.form['startdate'] #This is a str type
         enddate = request.form['enddate'] #This is a str type
+        inout_p2 = request.form['inout']
 
+    print('==============', inout_p2)
+    if inout_p2 == "in":
+        data_test = data_in
+        inout_p2 = "Arrival"
+    else:
+        data_test = data_out
+        inout_p2 = "Departure"
     #data_test = getdata.import_data("ขาเข้า")
     
     #data_test = data_in
@@ -120,11 +129,11 @@ def display2():
     new_df = test_k[time-1].explode(['Demand', 'Demand_Factor(D)', 'Load_Factor(L)', 'Spill_Factor(S)', 'Spill', 'Spill as % of demand'])
     new_df_test = new_df.reset_index()
     #for i in range(time):
-    new_df_test["Time"] = new_df_test["index"].replace({0: "06:00 - 11:00", 
-    1: "11:00 - 15:00",
-    2: "15:00 - 19:00",
-    3: "19:00 - 23:00",
-    4: "23:00 - 06:00",
+    new_df_test["Time"] = new_df_test["index"].replace({0: f"06:00 - 11:00 : {round(k_factor[0],3)}" , 
+    1: f"11:00 - 15:00 : {round(k_factor[1],3)}",
+    2: f"15:00 - 19:00 : {round(k_factor[2],3)}",
+    3: f"19:00 - 23:00 : {round(k_factor[3],3)}",
+    4: f"23:00 - 06:00 : {round(k_factor[4],3)}",
     })
 
     df_chart = spill_f.resample_df(test_df)
@@ -132,19 +141,20 @@ def display2():
     df_chart['date'] = [date.strftime("%Y-%m-%d") for date in df_chart.index.date]
     df_chart = df_chart.reset_index()
     df_chart = df_chart[df_chart.Passenger != 0]
+    df_chart['Diff'] = df_chart['Capacity'] - df_chart['Passenger']
 
     fig = px.line(data_frame = new_df_test, 
     x = 'Load_Factor(L)', 
     y = 'Spill as % of demand', 
     color='Time')
-    #fig.update_layout(showlegend=False, modebar_remove=True)
-    fig.update_layout(
-    showlegend=True, modebar_remove=True,legend=dict(
-    yanchor="top",
-    y=0.99,
-    xanchor="left",
-    x=0.01),title_text=f"K-Factor from {startdate} to {enddate}",title_x=0.5)
 
+    fig.update_layout(
+    showlegend=True, modebar_remove=True,hovermode='closest',
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+    font=dict(size=12,color="Black"),
+    hoverlabel=dict(bgcolor="white",font_size=16),
+    title_text=f"K-Factor from {startdate} to {enddate}",title_x=0.5)
+    '''
     fig1 = px.bar(data_frame = df_chart,
     x = 'date_and_time',
     y = 'Passenger',labels={"date_and_time": "Date&Time"})
@@ -154,24 +164,32 @@ def display2():
     mode="markers",
     fillcolor = "red",
     name = "Capacity")
+    '''
+    fig1 = go.Figure(data=[
+        go.Bar(name='Passenger', x=df_chart['date_and_time'], y=df_chart['Passenger'],marker_color='mediumseagreen'),
+        go.Bar(name='Capacity', x=df_chart['date_and_time'], y=df_chart['Diff'],marker_color='red')
+    ])
 
     label_date = df_chart.date.unique()
 
-    fig1.update_layout(showlegend=False, title_text=f"Graph from {startdate} to {enddate}",title_x=0.5)
-
-    fig1.update_xaxes(type="date",calendar="thai",autorange=True)
+    fig1.update_layout(showlegend=True, title_text=f"Krabi's BarGraph Results from {startdate} to {enddate} | {inout_p2}",title_x=0.5, barmode='stack',
+    xaxis_title="Time",yaxis_title="Passenger",
+    font=dict(size=12,color="Black"),
+    legend=dict(yanchor="top",y=0.99,xanchor="left",x=0.01))
+ 
+    fig1.update_xaxes(type="date", range=[startdate,label_date[2]], rangemode='normal')
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     graphJSON1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-    #graphJSON1 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
-    #return render_template("plotly_part2.html", graphJSON = graphJSON1)
+
     return render_template("plotly_part2.html",
     k_factor = k_factor,
     label_date = label_date, 
     graphJSON = graphJSON, 
-    graphJSON1 = graphJSON1)
+    graphJSON1 = graphJSON1,
+    inout_p2 = inout_p2)
     
-    #return df_chart.to_html()
+    #return df_test.to_html()
 
 @app.route('/callback', methods=['POST', 'GET'])
 def cb():
@@ -181,13 +199,22 @@ def cb():
     start_date = request.args.get('data') #This is a str type
         #end_date = request.form['end_date'] #This is a str type
     end_date = request.args.get('data1')
-    #2019-04-02
+    inout_p2 = request.args.get('data2')
+    print('StartDate',start_date)
+    print('Enddate is',end_date)
+    print('==================',inout_p2)
     #print('===============',type(test), start_date,end_date)
-    return update_graph(start_date,end_date)
+    return update_graph(start_date,end_date,inout_p2)
     
-def update_graph(startdate,enddate):
+def update_graph(startdate,enddate,inout_p2):
+
+    if inout_p2 == 'Arrival':
+        data_test = data_in
+    else:
+        data_test = data_out
 
     df_test = makedatetime.convertdate(data_test)
+    df_test['date'] = [date.strftime("%Y-%m-%d") for date in df_test.index.date]
     df_test = df_test.sort_index()
     test_df = makedatetime.select_time(df_test,startdate,enddate)
 
@@ -199,20 +226,22 @@ def update_graph(startdate,enddate):
     df_chart['date'] = [date.strftime("%Y-%m-%d") for date in df_chart.index.date]
     df_chart = df_chart.reset_index()
     df_chart = df_chart[df_chart.Passenger != 0]
+    df_chart['Diff'] = df_chart['Capacity'] - df_chart['Passenger']
 
-    fig1 = px.bar(data_frame = df_chart,
-    x = 'date_and_time',
-    y = 'Passenger',labels={"date_and_time": "Date&Time"})
+    label_date = df_test.date.unique()
+    
+    fig1 = go.Figure(data=[
+        go.Bar(name='Passenger', x=df_chart['date_and_time'], y=df_chart['Passenger'],marker_color='mediumseagreen'),
+        go.Bar(name='Capacity', x=df_chart['date_and_time'], y=df_chart['Diff'],marker_color='red')
+    ])
 
-    fig1.update_layout(showlegend=False, title_text=f"Graph from {startdate} to {enddate}",title_x=0.5)
 
-    fig1.add_scatter(x = df_chart['date_and_time'],
-    y = df_chart['Capacity'],
-    mode="markers",
-    fillcolor = "red",
-    name = "Capacity")
+    fig1.update_layout(showlegend=True, title_text=f"Krabi's BarGraph Results from {startdate} to {enddate} | {inout_p2}",title_x=0.5, barmode='stack',
+    xaxis_title="Time",yaxis_title="Passenger",
+    font=dict(size=12,color="Black"),
+    legend=dict(yanchor="top",y=0.99,xanchor="left",x=0.01))
 
-    fig1.update_xaxes(type="date")
+    fig1.update_xaxes(type="date", rangemode='normal', range=[startdate,label_date[np.where(label_date == enddate)[0][0]+1]])
 
     graphJSON2 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
 

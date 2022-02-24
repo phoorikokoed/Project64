@@ -23,35 +23,47 @@
         display: inline-block;
         margin-left: 115px;
       }
+      .space {
+        display: inline-block;
+        margin-left: 30px;
+      }
   </style>
 </head>
 <body scroll="no" style="overflow-x: hidden">
 
     <div id='chart' class='chart'”></div>
-    <p align="center", style="color:#636EFA";><b>K = {{k_factor[0]}}</b>
-    <span class="tabspace", style="color:#EF553B";><b>K = {{k_factor[1]}}</span></b>
-    <span class="tabspace", style="color:#00CC96";><b>K = {{k_factor[2]}}</span></b>
-    <span class="tabspace", style="color:#AB63FA";><b>K = {{k_factor[3]}}</span></b>
-    <span class="tabspace", style="color:#FFA15A";><b>K = {{k_factor[4]}}</span></b></p>
     <hr><br>
     <!-- Function to update line plot-->
     <script>
-      function update_graph(selection,selection1) {
+      function update_graph(selection,selection1, selection2) {
         $.getJSON({
-          url: "/callback", data: { 'data': selection, 'data1':selection1 }, success: function (result) {
+          url: "/callback", data: { 'data': selection, 'data1':selection1, 'data2':selection2 }, success: function (result) {
             Plotly.newPlot('chart1', result, {});;
                       }
                   });
               }
     </script>
-
+  
     <div class="selectdate">
-      <form onsubmit="update_graph(fname.value,ffname.value)">
+      <form >
         <span class="tab">
-          <b>Start Date:</b><span class = "datespace"><b>End Date:</b></span><br>
-            <input type="text" id="fname" name="fname" placeholder="YYYY-MM-DD">
-            <input type="text" id="ffname" name="ffname" placeholder="YYYY-MM-DD">
-            <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph(fname.value,ffname.value)" value="Update Graph"></input><br><br>
+          <b>Start Date:</b><span class = "space"><b>End Date:</b></span><br>
+            <select name="fffname" id="fffname">
+              {% for ld in label_date %}
+              <option value={{ld}}>{{ld}}</option>
+              {% endfor %}
+              </select>
+              <select name="ffffname" id="ffffname">
+                {% for ld in label_date %}
+                <option value={{ld}}>{{ld}}</option>
+                {% endfor %}
+                </select>
+                {% if 'Arrival' == inout_p2 %}
+                {% set inout = '{{inout_p2}}' %}
+                {% else %}
+                {% set inout = '{{inout_p2}}' %}
+                {% endif %}
+            <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph(fffname.value,ffffname.value,'{{inout_p2}}')" value="Update Graph"></input><br>
         </span>
       </form>
     </div>

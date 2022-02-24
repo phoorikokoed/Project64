@@ -58,11 +58,6 @@
                 <option value={{ld}}>{{ld}}</option>
                 {% endfor %}
                 </select>
-                {% if 'Arrival' == inout_p2 %}
-                {% set inout = '{{inout_p2}}' %}
-                {% else %}
-                {% set inout = '{{inout_p2}}' %}
-                {% endif %}
             <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph(fffname.value,ffffname.value,'{{inout_p2}}')" value="Update Graph"></input><br>
         </span>
       </form>

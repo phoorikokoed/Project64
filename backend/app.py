@@ -13,8 +13,8 @@ import pandas as pd
 import plotly
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import plotly.express as px
-from plotly.graph_objs import FigureWidget
 from datetime import datetime
 import getdata, makedatetime, capacity_insert, spill_f, clustering
 
@@ -41,17 +41,21 @@ def display1():
     if request.method == 'POST':
         date = request.form['date'] #This is a str type
         enddate = request.form['enddate'] #This is a str type
-        inout = request.form['inout']
+        inout_p1 = request.form['inout']
 
-    data = data_in
+    print('==============', inout_p1)
+    if inout_p1 == "Arrival":
+        data = data_in
+    else:
+        data = data_out
 
     df = makedatetime.convertdatetime(data)
     df = df.sort_index()
     df_period = makedatetime.select_time(df,date,enddate)
 
     arr = clustering.convertdata(df_period)
-    cluster = clustering.get_k_value(arr)
-    #cluster = 4
+    #cluster = int(clustering.get_k_value(arr))
+    cluster = 4
     prediction = clustering.dtw_clustering(arr, cluster)
     prediction += 1
     df_ans = clustering.create_dataframe(df_period,arr,prediction)
@@ -62,37 +66,68 @@ def display1():
     df_table = clustering.calculate_mean(df_ans_test)
     #f_cluster = df_ans_test[df_ans_test.Cluster == 1]
     
+    '''
     fig = px.line(data_frame = df_ans_test, 
     x = 'index', 
     y = 'Passenger', 
     color='date',
     facet_row = 'Cluster',labels={"index": "Hours"})
+    '''
+    #Craeate Variable for config graph title and specs
+    title = ['Cluster 1', 'Passenger']
+    a = [f'Cluster {i}' for i in range(2,cluster+1)]
+    title.extend(a)
+
+    spec = [[{"type": "xy"}, {"type": "table","rowspan": cluster}]]
+    b = [[{"type": "xy"}, None]]*(cluster-1)
+    spec.extend(b)
+
+    fig = make_subplots(rows=cluster, cols=2, subplot_titles=(title),vertical_spacing = 0.075,
+    specs=spec,column_widths=[0.85, 0.15])
+
+    for i in range(1,cluster+1):
+        # Add traces
+        fig2 = px.line(data_frame = df_ans_test[df_ans_test.Cluster == i], 
+        x = 'index', 
+        y = 'Passenger', 
+        color='date',
+        labels={"index": "Hours"})
+        for j in range(len(fig2['data'])):
+            fig.add_trace(fig2['data'][j], row=i, col=1)
+        fig.update_layout(height=cluster*300)
+        fig.update_xaxes(title_text="Hours", title_font=dict(size=16,color="Black"),tickfont=dict(size=16,color='Black'),row=i, col=1)
+        fig.update_yaxes(title_text="Passenger", title_font=dict(size=16,color="Black"),tickfont=dict(size=16,color='Black'),row=i, col=1, range=[-50, df_ans_test.Passenger.max()+70])
+        fig.layout.annotations[i-1].update(x=0.04,font=dict(size=16,color='Black'))
+    fig.layout.annotations[cluster].update(x=0.04,font=dict(size=16,color='Black'))
+    fig.layout.annotations[1].update(x=0.83,font=dict(size=16,color='Black'))
+
+    fig.update_layout(autosize=True,showlegend=False, modebar_remove=True,title_text=f"Clustering {date} to {enddate} | {inout_p1}",title_x=0.5,font=dict(size=12,color="Black"),
+    hoverlabel=dict(bgcolor="white",font_size=16))
     
-    fig.update_layout(height=850,width=1600,showlegend=False, modebar_remove=True,title_text=f"Clustering {date} to {enddate}",title_x=0.5)
     fig.add_trace(go.Table(
-    #columnorder = [1,2,3,4],
-    #margin=dict(l=5,r=5,b=10,t=10),
-    domain=dict(x=[0,0.23]),
+
+    domain=dict(x=[0,0.023]),
     columnwidth = [5,5,5,5],
     header = dict(height = 30,
-                  values = [['<b>Cluster</b>'],['<b>เช้า</b>'],
-                            ['<b>บ่าย</b>'], ['<b>เย็น</b>']],
+                  values = [['<b>Cluster</b>'],['<b>10:00</b>'],
+                            ['<b>15:00</b>'], ['<b>18:00</b>']],
                   line = dict(color='rgb(50, 50, 50)'),
                   align = ['left'] * 5,
                   font = dict(color=['rgb(45, 45, 45)'] * 5, size=14),
-                  fill = dict(color='#d562be')),
+                  fill = dict(color='#E5ECF6')),
     cells = dict(values = [k for k in df_table],
-                 line = dict(color='#506784'),
+                 line = dict(color='black'),
                  align = ['left'] * 5,
-                 height = 25,
-                 fill = dict(color=['rgb(235, 193, 238)', 'rgba(228, 222, 249, 0.65)']))
-    ))
-    fig.update_layout(margin=dict(b=20,t=30))
-    #fig_test = go.FigureWidget(data=[fig1]) 
+                 height = 25,font = dict(color=['rgb(45, 45, 45)'] * 5, size=14),
+                 fill = dict(color=['#E3F2FD', 'white']))
+    ),row=1, col=2)
+    fig.update_traces(domain_x=[0.8,1], selector=dict(type='table'))
+    #fig.add_annotation(text="Passenger", row=1, col=2)
+    #fig.update_layout(margin=dict(b=20,t=30))
+
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    #graphJSON1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-    #fig_test = plotly.io.to_json(fig1)
-    return render_template("plotly_part1.html", graphJSON=graphJSON)
+
+    return render_template("plotly_part1.html", graphJSON=graphJSON, table=df_table)
     #return df_ans_test.to_html()
 
 @app.route('/spillinfo', methods=["GET","POST"])
@@ -108,12 +143,11 @@ def display2():
         inout_p2 = request.form['inout']
 
     print('==============', inout_p2)
-    if inout_p2 == "in":
+    if inout_p2 == "Arrival":
         data_test = data_in
-        inout_p2 = "Arrival"
     else:
         data_test = data_out
-        inout_p2 = "Departure"
+
     #data_test = getdata.import_data("ขาเข้า")
     
     #data_test = data_in
@@ -153,7 +187,7 @@ def display2():
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
     font=dict(size=12,color="Black"),
     hoverlabel=dict(bgcolor="white",font_size=16),
-    title_text=f"K-Factor from {startdate} to {enddate}",title_x=0.5)
+    title_text=f"K-Factor from {startdate} to {enddate} | {inout_p2}",title_x=0.5)
     '''
     fig1 = px.bar(data_frame = df_chart,
     x = 'date_and_time',

@@ -1,15 +1,14 @@
 {% include "layout.html" %}
 
-
 {% block content %}
 <div class="container">
     <br>
     <form action="{{url_for('display2')}}" method = "post">
         <h2>Part 2 : SpillInfo</h2> <br>
         <input type="text" name="type" /><br>
-        Start Date <br>
+        <b>Start Date:</b><br>
         <input type="date" name="startdate" required="required" /><br>
-        End Date <br>
+        <b>End Date:</b><br>
         <input type="date" name="enddate" required="required" /> <br>
         เข้า || ออก: <br>
         <select id="inout" name="inout">

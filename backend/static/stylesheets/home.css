@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&family=Poppins:wght@100;400&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Noto Sans Thai', 'Poppins',sans-serif;
+}
+
+body{
+    background: whitesmoke;
+    width: 100%;
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.container{
+    width: 100%;
+    height: 100vh;
+    /* background: whitesmoke; */
+}
+
+.row{
+    display: flex;
+    height: 68%;
+    align-items: center;
+}
+
+.col{
+    flex-basis: 0%;
+}
+
+.c1{
+    width: 350px;
+    height: 230px;
+    display: inline-block;
+    border-radius: 10px;
+    padding: 15px 25px;
+    box-sizing: border-box;
+    cursor: pointer;
+    margin: 10px 15px;
+    transition: transform 0.5s;
+}
+
+.card{
+    width: 350px;
+    height: 230px;
+    display: inline-block;
+    border-radius: 10px;
+    padding: 15px 25px;
+    box-sizing: border-box;
+    cursor: pointer;
+    margin: 10px 15px;
+    transition: transform 0.5s;
+    background-position: bottom;
+    background-size: cover;
+}
+
+.card:hover{
+    transform: translateY(-10px);
+}
+
+.mainrow{
+    padding-top: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.maincol{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.maincard {
+    width: 1050px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card1{
+    background-image: url(../images/homepage/1968246.jpg);
+}
+
+.card2{
+    background-image: url(../images/homepage/1968246.jpg);
+}
+
+.card3{
+    background-image: url(../images/homepage/1968246.jpg);
+}

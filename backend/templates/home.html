@@ -8,11 +8,39 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Homepage</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/home.css') }}" />
 </head>
 <body>
-    <div class="container" align="margin-center">
-        <h1>Home</h1>
+    <div class="container">
+        <div class="row mainrow">
+            <div class="col maincol">
+                <div class="card maincard">
+                    <h5>Test Big</h5>
+                    <p>Hello World</p>
+                </div>
+            </div>
+        <div class="row">
+            <div class="col">
+                <div class="card card1">
+                    <h5><b>Groupping Passenger</b></h5>
+                    <p>จัดกลุ่มผู้โดยสารเพื่อดูว่าผู้โดยสารทางอากาศภายในประเทศไทยในช่วงเวลาต่างๆสามารถแบ่งออกได้เป็นกี่กลุ่มบ้าง</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card card2">
+                    <h5><b>Spill Analysis</b></h5>
+                    <p>ศึกษาและวิเคราะห์ Spill ที่จะเกิดขึ้นในช่วงเวลาต่างๆจากข้อมูลผู้โดยสารทางอากาศ</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card card3">
+                    <h5><b>Predict Passenger</b></h5>
+                    <p>ทำนายจำนวนผู้โดยสารทางอากาศในอนาคต</p>
+                </div>
+            </div>
+        </div>
+        </div>
     </div>
 </body>
 </html>

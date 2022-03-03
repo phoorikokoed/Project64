@@ -85,6 +85,6 @@ def get_k_value(array):
   seed = 0
   np.random.seed(seed)
   model = TimeSeriesKMeans(metric='dtw', max_iter=100, random_state=seed, dtw_inertia=True)
-  a = kelbow_visualizer(model, X = array, k=(3, 10), timings=False, show=False)
+  a = kelbow_visualizer(model, X = array, k=(1, 12), timings=False, show=False)
   k = a.elbow_value_
   return k

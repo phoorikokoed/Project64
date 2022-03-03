@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&family=Poppins:wght@100;400&display=swap');
+
+.head{
+    margin: 0%;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Noto Sans Thai', 'Poppins',sans-serif;
+    width: auto;
+}
+
+.navbar-nav {
+    font-size: 18px;
+}
+
+.navbar-brand{
+    font-size: 20px;
+}

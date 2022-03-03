@@ -1,22 +1,45 @@
 {% include "layout.html" %}
 
 {% block content %}
-<div class="container">
-    <br>
-    <form action="{{url_for('display2')}}" method = "post">
-        <h2>Part 2 : SpillInfo</h2> <br>
-        <input type="text" name="type" /><br>
-        <b>Start Date:</b><br>
-        <input type="date" name="startdate" required="required" /><br>
-        <b>End Date:</b><br>
-        <input type="date" name="enddate" required="required" /> <br>
-        เข้า || ออก: <br>
-        <select id="inout" name="inout">
-          <option value="Arrival">ขาเข้า</option>
-          <option value="Departure">ขาออก</option> 
-          </select><br><br>
-        <button type="submit" class="btn btn-success btn-block btn-large">Submit</button>
-        <button type="reset" class="btn btn-danger btn-block btn-large">Reset</button>
-    </form>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spill Analysis</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/part1&2.css') }}" />
+</head>
+<body>
+  <br>
+  <div class="container">
+    <div class="title">Input date to Spill analysis</div>
+      <form action="{{url_for('display2')}}" method = "post">
+        <div class = 'user-detail'>
+          <div class="input-box">
+            <span class="details"><b>Start Date:</b></span>
+            <input type="date" name="startdate" required="required" />
+          </div>
+          <div class="input-box">
+            <span class="details"><b>End Date:</b></span>
+            <input type="date" name="enddate" required="required" />
+          </div>
+          <div class="input-box">
+            <span class="details"><b>กรุณาเลือกระหว่าง ขาเข้า หรือ ขาออก:</b></span>
+            <select id="inout" name="inout" required="required">
+              <option selected>----</option>
+              <option value="Arrival">ขาเข้า</option>
+              <option value="Departure">ขาออก</option> 
+            </select>
+          </div>
+        </div>
+        <div class = "button_send">
+          <button type="submit" class="btn btn-success btn-block btn-large">Submit</button>
+          <button type="reset" class="btn btn-danger btn-block btn-large">Reset</button>
+        </div>
+      </form>
+  </div>
+</body>
+</html>
+
 {% endblock %}

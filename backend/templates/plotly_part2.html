@@ -8,26 +8,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Plotly Part 2</title>
-    <style>
-      .tab {
-          display: inline-block;
-          margin-left: 80px;
-      }
-      .tabspace {
-        display: inline-block;
-        margin-left: 15px;
-      }
-      .datespace {
-        display: inline-block;
-        margin-left: 115px;
-      }
-      .space {
-        display: inline-block;
-        margin-left: 30px;
-      }
-  </style>
+    <title>Spill Result</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/plotpart2.css') }}" />
 </head>
 <body scroll="no" style="overflow-x: hidden">
 
@@ -47,13 +29,15 @@
     <div class="selectdate">
       <form >
         <span class="tab">
-          <b>Start Date:</b><span class = "space"><b>End Date:</b></span><br>
-            <select name="fffname" id="fffname">
+          <b>Start Date:</b><span class = "tab"><b>End Date:</b></span><br>
+            <select class="form-select" aria-label="Default select example" style="width:auto;" name="fffname" id="fffname">
+              <option selected>YYYY-MM-DD</option>
               {% for ld in label_date %}
               <option value={{ld}}>{{ld}}</option>
               {% endfor %}
               </select>
-              <select name="ffffname" id="ffffname">
+              <select class="form-select" aria-label="Default select example" style="width:auto;" name="ffffname" id="ffffname">
+                <option selected>YYYY-MM-DD</option>
                 {% for ld in label_date %}
                 <option value={{ld}}>{{ld}}</option>
                 {% endfor %}

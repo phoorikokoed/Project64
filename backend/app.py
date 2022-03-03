@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 from datetime import datetime
-import getdata, makedatetime, capacity_insert, spill_f, clustering
+import getdata, makedatetime, capacity_insert, spill_f, clustering, prediction
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mykey'
@@ -29,7 +29,6 @@ data_out = getdata.import_data("ขาออก")
 
 @app.route('/')
 def home():
-    
     return render_template("home.html")
 
 @app.route('/clustering', methods=["GET","POST"])
@@ -74,8 +73,8 @@ def display1():
     facet_row = 'Cluster',labels={"index": "Hours"})
     '''
     #Craeate Variable for config graph title and specs
-    title = ['Cluster 1', 'Passenger']
-    a = [f'Cluster {i}' for i in range(2,cluster+1)]
+    title = ['Cluster 1:', 'Passengers:']
+    a = [f'Cluster {i}:' for i in range(2,cluster+1)]
     title.extend(a)
 
     spec = [[{"type": "xy"}, {"type": "table","rowspan": cluster}]]
@@ -95,13 +94,14 @@ def display1():
         for j in range(len(fig2['data'])):
             fig.add_trace(fig2['data'][j], row=i, col=1)
         fig.update_layout(height=cluster*300)
-        fig.update_xaxes(title_text="Hours", title_font=dict(size=16,color="Black"),tickfont=dict(size=16,color='Black'),row=i, col=1)
-        fig.update_yaxes(title_text="Passenger", title_font=dict(size=16,color="Black"),tickfont=dict(size=16,color='Black'),row=i, col=1, range=[-50, df_ans_test.Passenger.max()+70])
-        fig.layout.annotations[i-1].update(x=0.04,font=dict(size=16,color='Black'))
-    fig.layout.annotations[cluster].update(x=0.04,font=dict(size=16,color='Black'))
-    fig.layout.annotations[1].update(x=0.83,font=dict(size=16,color='Black'))
+        fig.update_xaxes(title_text="Hours", title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'),row=i, col=1)
+        fig.update_yaxes(title_text="Passengers", title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'),row=i, col=1, range=[-50, df_ans_test.Passenger.max()+70])
+        fig.layout.annotations[i-1].update(x=0.04,font=dict(size=18,color='Black',family='Open Sans, monospace'))
+    fig.layout.annotations[cluster].update(x=0.04,font=dict(size=18,color='Black',family='Open Sans, monospace'))
+    fig.layout.annotations[1].update(x=0.83,font=dict(size=18,color='Black',family='Open Sans, monospace'))
 
-    fig.update_layout(autosize=True,showlegend=False, modebar_remove=True,title_text=f"Clustering {date} to {enddate} | {inout_p1}",title_x=0.5,font=dict(size=12,color="Black"),
+    fig.update_layout(autosize=True,showlegend=False, modebar_remove=True,title_text=f"Group's Result from {date} to {enddate} | {inout_p1}",title_x=0.5,
+    font=dict(size=14,color="Black",family='Open Sans, monospace'),
     hoverlabel=dict(bgcolor="white",font_size=16))
     
     fig.add_trace(go.Table(
@@ -113,17 +113,16 @@ def display1():
                             ['<b>15:00</b>'], ['<b>18:00</b>']],
                   line = dict(color='rgb(50, 50, 50)'),
                   align = ['left'] * 5,
-                  font = dict(color=['rgb(45, 45, 45)'] * 5, size=14),
+                  font = dict(color=['rgb(45, 45, 45)'] * 5, size=16, family='Open Sans, monospace'),
                   fill = dict(color='#E5ECF6')),
     cells = dict(values = [k for k in df_table],
                  line = dict(color='black'),
                  align = ['left'] * 5,
-                 height = 25,font = dict(color=['rgb(45, 45, 45)'] * 5, size=14),
+                 height = 30,font = dict(color=['rgb(45, 45, 45)'] * 5, size=16, family='Open Sans, monospace'),
                  fill = dict(color=['#E3F2FD', 'white']))
     ),row=1, col=2)
     fig.update_traces(domain_x=[0.8,1], selector=dict(type='table'))
-    #fig.add_annotation(text="Passenger", row=1, col=2)
-    #fig.update_layout(margin=dict(b=20,t=30))
+
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -185,9 +184,11 @@ def display2():
     fig.update_layout(
     showlegend=True, modebar_remove=True,hovermode='closest',
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-    font=dict(size=12,color="Black"),
+    font=dict(size=14,color="Black",family='Open Sans, monospace'),
     hoverlabel=dict(bgcolor="white",font_size=16),
     title_text=f"K-Factor from {startdate} to {enddate} | {inout_p2}",title_x=0.5)
+    fig.update_xaxes(title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
+    fig.update_yaxes(title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     '''
     fig1 = px.bar(data_frame = df_chart,
     x = 'date_and_time',
@@ -206,12 +207,13 @@ def display2():
 
     label_date = df_chart.date.unique()
 
-    fig1.update_layout(showlegend=True, title_text=f"Krabi's BarGraph Results from {startdate} to {enddate} | {inout_p2}",title_x=0.5, barmode='stack',
+    fig1.update_layout(showlegend=True, title_text=f"Krabi's Results from {startdate} to {enddate} | {inout_p2}",title_x=0.5, barmode='stack',
     xaxis_title="Time",yaxis_title="Passenger",
-    font=dict(size=12,color="Black"),
+    font=dict(size=14,color="Black",family='Open Sans, monospace'),
     legend=dict(yanchor="top",y=0.99,xanchor="left",x=0.01))
  
-    fig1.update_xaxes(type="date", range=[startdate,label_date[2]], rangemode='normal')
+    fig1.update_xaxes(type="date", range=[startdate,label_date[2]], rangemode='normal',title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
+    fig1.update_yaxes(title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     graphJSON1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
@@ -272,7 +274,7 @@ def update_graph(startdate,enddate,inout_p2):
 
     fig1.update_layout(showlegend=True, title_text=f"Krabi's BarGraph Results from {startdate} to {enddate} | {inout_p2}",title_x=0.5, barmode='stack',
     xaxis_title="Time",yaxis_title="Passenger",
-    font=dict(size=12,color="Black"),
+    font=dict(size=14,color="Black",family='Open Sans, monospace'),
     legend=dict(yanchor="top",y=0.99,xanchor="left",x=0.01))
 
     fig1.update_xaxes(type="date", rangemode='normal', range=[startdate,label_date[np.where(label_date == enddate)[0][0]+1]])
@@ -283,8 +285,20 @@ def update_graph(startdate,enddate,inout_p2):
 
 @app.route('/predictpassenger', methods=["GET","POST"])
 def predict():
-    #return "Hello World"
+
     return render_template("part3.html")
+
+@app.route('/displaypart3', methods=["GET", "POST"])
+def modelpredict():
+    if request.method == 'POST':
+        startdate = request.form['startdate'] #This is a str type
+        enddate = request.form['enddate'] #This is a str type
+        #inout_p3 = request.form['inout']
+    daterange = pd.date_range(start=startdate, end=enddate, freq ='3H')
+    df_datetime = daterange.to_frame(name = 'DateTime')
+    df_time = prediction.getdatevalue(df_datetime)
+    #return "Hello World"
+    return df_time.to_html()
 
 @app.route('/test', methods=["GET","POST"])
 def import_db():

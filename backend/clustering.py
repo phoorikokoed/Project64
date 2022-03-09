@@ -15,7 +15,7 @@ def convertdata(df):
 
 def countday(df):
   mon,tue,wed,thu,fri,sat,sun = 0,0,0,0,0,0,0
-  cluster = np.unique(df.cluster)[0]
+  cluster = np.unique(df.Cluster)[0]
   for i in range(len(df)):
     day = df.index[i].weekday()
     if day == 0:
@@ -32,7 +32,7 @@ def countday(df):
       sat += 1
     else:
       sun += 1
-  #print(f'Cluster : {cluster}\nIn {len(df)} day(s) consist of\nSunday : {sun} day(s)\nMonday : {mon} day(s)\nTuesday : {tue} day(s)\nWednesday : {wed} day(s)\nThursday : {thu} day(s)\nFriday : {fri} day(s)\nSaturday : {sat} day(s)\n=============================')
+  print(f'Cluster : {cluster}\nIn {len(df)} day(s) consist of\nSunday : {sun} day(s)\nMonday : {mon} day(s)\nTuesday : {tue} day(s)\nWednesday : {wed} day(s)\nThursday : {thu} day(s)\nFriday : {fri} day(s)\nSaturday : {sat} day(s)\n=============================')
 
 def dtw_clustering(arr, cluster):
   seed = 0

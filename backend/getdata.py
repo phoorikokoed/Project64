@@ -6,6 +6,9 @@ mongoClient = MongoClient('mongodb://localhost:27017')
 db = mongoClient.get_database('sample1')
 data_sample = db.get_collection('data')
 
+factor = db.get_collection('factor')
+factor_date = db.get_collection('factor_date')
+
 def import_data(groups):
     test = data_sample.find({"ARR_DEP (groups)": groups})
     docs_list  = list(test)
@@ -27,8 +30,9 @@ def import_data(groups):
      axis=1)
 
     dff = df[(df.TraffTypeDescTH == 'เที่ยวบินประจำภายในประเทศ')]
-    dft = dff[(dff.AirportNameTH == 'ท่าอากาศยานกระบี่') & 
-    ((dff.AirportNameTH_O == 'ท่าอากาศยานดอนเมือง') | (dff.AirportNameTH_O == 'ท่าอากาศยานสุวรรณภูมิ'))]
+    dft = dff[((dff.AirportNameTH_O == 'ท่าอากาศยานดอนเมือง') | (dff.AirportNameTH_O == 'ท่าอากาศยานสุวรรณภูมิ'))]
+    # dft = dff[(dff.AirportNameTH == 'ท่าอากาศยานกระบี่') & 
+    # ((dff.AirportNameTH_O == 'ท่าอากาศยานดอนเมือง') | (dff.AirportNameTH_O == 'ท่าอากาศยานสุวรรณภูมิ'))]
     #dft = dft.astype({"TRN_DD": int})
     dft = dft.sort_values(["TRN_YY","TRN_MM", "TRN_DD","TRN_TIME"], ascending = (True,True,True,True))
     

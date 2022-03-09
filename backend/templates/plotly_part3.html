@@ -1,0 +1,77 @@
+{% include "layout.html" %}
+
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+</head>
+<body>
+    <div class="container2">
+            <!-- Function to update line plot-->
+    <script>
+        function update_graph3(selection,selection1,selection2,selection3,selection4) {
+            // console.log(selection2,selection3)
+          $.getJSON({
+            url: "/callback1", data: { 'data': selection, 'data1':selection1, 'data2':selection2, 'data3':selection3, 'data4':selection4}, success: function (result) {
+              Plotly.newPlot('chart1', result, {});;
+                        }
+                    });
+                }
+        </script>
+
+ 
+           <!-- {{ predictdate|safe }} -->
+
+      <div class="selectdate">
+        <form>
+          <span class="tab">
+            <b>Start Date:</b><span class = "tab"><b>End Date:</b></span><br>
+              <select class="form-select" aria-label="Default select example" style="width:auto;" name="fffname" id="fffname">
+                <option selected>YYYY-MM-DD</option>
+                {% for ld in label_date %}
+                <option value={{ld}}>{{ld}}</option>
+                {% endfor %}
+                </select>
+                <select class="form-select" aria-label="Default select example" style="width:auto;" name="ffffname" id="ffffname">
+                  <option selected>YYYY-MM-DD</option>
+                  {% for ld in label_date %}
+                  <option value={{ld}}>{{ld}}</option>
+                  {% endfor %}
+                  </select>
+              <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph3(fffname.value,ffffname.value,'{{inout_p3}}', {{ predictdate|safe }}, {{predictvalue|safe}} )" value="Update Graph"></input><br>
+          </span>
+        </form>
+      </div>
+  
+        <div id='chart' class='chart'”></div>
+        <div id='chart1' class='chart'”></div>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <script type='text/javascript'>
+          var graphs = {{graphJSON | safe}};
+          var config = {"displayModeBar": false};
+          Plotly.setPlotConfig(config);
+          Plotly.plot('chart',graphs,{});
+        </script>
+
+        <script type="text/javascript">
+            var map_var = {{graphJSON1 | safe}};
+            var config = {"displayModeBar": false};
+            var map = document.getElementById('chart1')
+            Plotly.setPlotConfig(config);
+            Plotly.plot("map",map_var);
+            map.on('plotly_click', function(data){
+                update_graph(data.points[0].location);
+            });
+        </script>
+      </div>
+</body>
+</html>
+
+{% endblock %}

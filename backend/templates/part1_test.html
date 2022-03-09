@@ -25,11 +25,20 @@
           <input type="date" name="enddate" required="required" />
         </div>
         <div class="input-box">
-          <span class="details"><b>กรุณาเลือกระหว่าง ขาเข้า หรือ ขาออก:</b></span>
+          <span class="details"><b>Arrival or Departure:</b></span>
           <select name="inout" id="inout" required="required">
             <option selected>----</option>
-            <option value="Arrival">ขาเข้า</option>
-            <option value="Departure">ขาออก</option> 
+            <option value="Arrival">Arrival</option>
+            <option value="Departure">Departure</option> 
+          </select>
+        </div>
+        <div class="input-box">
+          <span class="details"><b>กรุณาเลือกสนามบิน:</b></span>
+          <select name="airport_data" id="airport_data" required="required">
+            <option selected>----</option>
+            {% for ld in airport %}
+            <option value={{ld}}>{{ld}}</option>
+            {% endfor %}
           </select>
         </div>
       </div>

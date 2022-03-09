@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spill Result</title>
+    <title>Spill's Result</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/plotpart2.css') }}" />
 </head>
 <body scroll="no" style="overflow-x: hidden">
@@ -17,9 +17,9 @@
     <hr><br>
     <!-- Function to update line plot-->
     <script>
-      function update_graph(selection,selection1, selection2) {
+      function update_graph(selection,selection1,selection2,selection3) {
         $.getJSON({
-          url: "/callback", data: { 'data': selection, 'data1':selection1, 'data2':selection2 }, success: function (result) {
+          url: "/callback", data: { 'data': selection, 'data1':selection1, 'data2':selection2, 'data3':selection3 }, success: function (result) {
             Plotly.newPlot('chart1', result, {});;
                       }
                   });
@@ -42,7 +42,7 @@
                 <option value={{ld}}>{{ld}}</option>
                 {% endfor %}
                 </select>
-            <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph(fffname.value,ffffname.value,'{{inout_p2}}')" value="Update Graph"></input><br>
+            <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph(fffname.value,ffffname.value,'{{inout_p2}}', '{{airport_data2}}')" value="Update Graph"></input><br>
         </span>
       </form>
     </div>
@@ -56,7 +56,7 @@
 
     <script type='text/javascript'>
       var graphs = {{graphJSON | safe}};
-      var config = {"displayModeBar": false};
+      var config = {"displayModeBar": true};
       Plotly.setPlotConfig(config);
       Plotly.plot('chart',graphs,{});
     </script>

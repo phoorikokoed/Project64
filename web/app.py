@@ -63,8 +63,8 @@ def display1():
     df_period = makedatetime.select_time(df,date,enddate)
 
     arr = clustering.convertdata(df_period)
-    #cluster = int(clustering.get_k_value(arr))
-    cluster = 4
+    cluster = int(clustering.get_k_value(arr))
+    #cluster = 4
     prediction = clustering.dtw_clustering(arr, cluster)
     prediction += 1
     df_ans = clustering.create_dataframe(df_period,arr,prediction)

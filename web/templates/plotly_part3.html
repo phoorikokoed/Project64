@@ -9,15 +9,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction Result</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/plotpart3.css') }}" />
 </head>
 <body>
+    <br>
     <div class="container2">
             <!-- Function to update line plot-->
     <script>
-        function update_graph3(selection,selection1,selection2,selection3,selection4) {
+        function update_graph3(selection,selection1,selection2,selection3,selection4,selection5) {
             // console.log(selection2,selection3)
           $.getJSON({
-            url: "/callback1", data: { 'data': selection, 'data1':selection1, 'data2':selection2, 'data3':selection3, 'data4':selection4}, success: function (result) {
+            url: "/callback1", data: { 'data': selection, 'data1':selection1, 'data2':selection2, 'data3':selection3, 'data4':selection4, 'data5':selection5}, success: function (result) {
               Plotly.newPlot('chart1', result, {});;
                         }
                     });
@@ -26,7 +28,6 @@
 
  
            <!-- {{ predictdate|safe }} -->
-
       <div class="selectdate">
         <form>
           <span class="tab">
@@ -43,7 +44,7 @@
                   <option value={{ld}}>{{ld}}</option>
                   {% endfor %}
                   </select>
-              <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph3(fffname.value,ffffname.value,'{{inout_p3}}', {{ predictdate|safe }}, {{predictvalue|safe}} )" value="Update Graph"></input><br>
+              <input type="button" class="btn btn-success btn-block btn-large" onclick="update_graph3(fffname.value,ffffname.value,'{{inout_p3}}', {{ predictdate|safe }}, {{predictvalue|safe}}, '{{airport_data3}}' )" value="Update Graph"></input><br>
           </span>
         </form>
       </div>
@@ -53,6 +54,7 @@
         <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+        <br><br>
         <script type='text/javascript'>
           var graphs = {{graphJSON | safe}};
           var config = {"displayModeBar": false};

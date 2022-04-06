@@ -1,0 +1,25 @@
+.tab {
+    display: inline-block;
+    margin-left: 75px;
+    }
+.tabspace {
+      display: inline-block;
+      margin-left: 15px;
+    }
+.datespace {
+      display: inline-block;
+      margin-left: 115px;
+    }
+.space {
+      display: inline-block;
+      margin-left: 60px;
+    }
+.form-select{display:inline-block}
+
+.body {
+  margin: 0;
+}
+.div {
+  width: 100vw;
+  height: 100vh;
+}

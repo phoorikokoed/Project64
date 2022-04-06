@@ -13,7 +13,7 @@
 <body>
   <br>
   <div class="container">
-    <div class="title">Input date to group passenger</div>
+    <div class="title">Fill in details to group passenger</div>
     <form action="{{url_for('display1')}}" method = "post">
       <div class = 'user-detail'>
         <div class="input-box">
@@ -33,7 +33,7 @@
           </select>
         </div>
         <div class="input-box">
-          <span class="details"><b>กรุณาเลือกสนามบิน:</b></span>
+          <span class="details"><b>Please select an airport:</b></span>
           <select name="airport_data" id="airport_data" required="required">
             <option selected>----</option>
             {% for ld in airport %}

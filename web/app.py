@@ -24,18 +24,13 @@ Bootstrap(app)
 
 mongoClient = MongoClient('mongodb://localhost:27017')
 db = mongoClient.get_database('sample1')
-factor_db = db.get_collection('factor')
-factor_date_db = db.get_collection('factor_date')
-randomforestdata_db = db.get_collection('randomforest')
+
 
 data_in = getdata.import_data("ขาเข้า")
 data_out = getdata.import_data("ขาออก")
 ori_data = pd.concat([data_in, data_out], ignore_index=True)
 airport = ori_data.AirportNameTH.unique() 
-factor = pd.DataFrame(list(factor_db.find()))
-factor_date = pd.DataFrame(list(factor_date_db.find()))
-factor_date = factor_date.astype({"Year": int})
-randomforestdata = pd.DataFrame(list(randomforestdata_db.find()))
+airport = ['ท่าอากาศยานกระบี่','ท่าอากาศยานสุราษฎร์ธานี']
 
 @app.route('/')
 def home():
@@ -61,13 +56,15 @@ def display1():
     else:
         data = data_out
     data = data[data.AirportNameTH == airport_data1]
+
+    airport_name = capacity_insert.format_airport(airport_data1)
     df = makedatetime.convertdatetime(data)
     df = df.sort_index()
     df_period = makedatetime.select_time(df,date,enddate)
 
     arr = clustering.convertdata(df_period)
-    cluster = int(clustering.get_k_value(arr))
-    #cluster = 7
+    #cluster = int(clustering.get_k_value(arr))
+    cluster = 4
     prediction = clustering.dtw_clustering(arr, cluster)
     prediction += 1
     df_ans = clustering.create_dataframe(df_period,arr,prediction)
@@ -116,7 +113,7 @@ def display1():
     fig.layout.annotations[cluster].update(x=0.04,font=dict(size=18,color='Black',family='Open Sans, monospace'))
     fig.layout.annotations[1].update(x=0.83,font=dict(size=18,color='Black',family='Open Sans, monospace'))
 
-    fig.update_layout(autosize=True,showlegend=False, modebar_remove=True,title_text=f"Group's Result from {date} to {enddate} | {inout_p1}",title_x=0.5,
+    fig.update_layout(autosize=True,showlegend=False, modebar_remove=True,title_text=f"{airport_name}'s group result from {date} to {enddate} | {inout_p1}",title_x=0.5,
     font=dict(size=14,color="Black",family='Open Sans, monospace'),
     hoverlabel=dict(bgcolor="white",font_size=16))
     
@@ -200,14 +197,16 @@ def display2():
     fig = px.line(data_frame = new_df_test, 
     x = 'Load_Factor(L)', 
     y = 'Spill as % of demand', 
-    color='Time')
+    color='Time',height=600)
 
     fig.update_layout(
     showlegend=True, modebar_remove=True,hovermode='closest',
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
     font=dict(size=14,color="Black",family='Open Sans, monospace'),
     hoverlabel=dict(bgcolor="white",font_size=16),
-    title_text=f"K-Factor from {startdate} to {enddate} | {inout_p2}",title_x=0.5)
+    title_text=f"{airport_name}'s K-Factor from {startdate} to {enddate} | {inout_p2}",title_x=0.5)
+    # fig.update_layout(legend = dict(font = dict(family = "Open Sans, monospace", size = 16, color = "black")),
+    #               legend_title = dict(font = dict(family = "Open Sans, monospace", size = 16, color = "black")))
     fig.update_xaxes(title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     fig.update_yaxes(title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     '''
@@ -280,7 +279,7 @@ def update_graph(startdate,enddate,inout_p2,airport_data2):
     df_test['date'] = [date.strftime("%Y-%m-%d") for date in df_test.index.date]
     df_test = df_test.sort_index()
     test_df = makedatetime.select_time(df_test,startdate,enddate)
-
+    test_df = test_df.dropna()
     test_df['AIR_TYPE'] = test_df.apply(lambda row: capacity_insert.format_airtype(row), axis=1)
     test_df['Capacity'] = test_df.apply(lambda row: capacity_insert.insert_cap(row), axis=1)
 
@@ -315,7 +314,7 @@ def update_graph(startdate,enddate,inout_p2,airport_data2):
 def predict():
     # data = randomforestdata
     # return data.to_html()
-    return render_template("part3.html")
+    return render_template("part3.html",airport = airport)
 
 @app.route('/displaypart3', methods=["GET", "POST"])
 def modelpredict():
@@ -323,41 +322,47 @@ def modelpredict():
         startdate = request.form['startdate'] #This is a str type
         enddate = request.form['enddate'] #This is a str type
         inout_p3 = request.form['inout']
-    
-    # if inout_p3 == 'Arrival':
-    #     data = data_in
-    # else:
-    #     data = data_out
-    data = data_in
-    data = data[data.AirportNameTH == 'ท่าอากาศยานกระบี่']
+        airport_data3 = request.form['airport_data']
+  
+    if inout_p3 == 'Arrival':
+        data = data_in
+    else:
+        data = data_out
+
+    #data = data_in
+    airport_name = capacity_insert.format_airport(airport_data3)
+    data = data[data.AirportNameTH == airport_data3]
     test = prediction.converttime(data)
     test = test[test.PASSENGER != 0]
+
     df = prediction.resam(test)
-    df = prediction.getdatevalue(df)
+    df = prediction.getdatevalue(df) #train data
     #df = prediction.getoldpassenger(df)
     #df = prediction.select_time(df,'2015-01-01','2019-12-31')
 
     #df = prediction.merge(df,factor,factor_date)
-    gen = ['Year','Month','Week','Date','Hour','Dayofweek','Previous','2Previous','3Previous']
+    gen = ['Year','Month','Week','Date','Hour','Dayofweek','Previous','2Previous','3Previous','4Previous']
     
-    daterange = pd.date_range(start=startdate, end=enddate, freq='6H')
-    # daterange = pd.date_range(start=startdate, end=enddate, freq ='3H')
+    enddate1 = prediction.plusdate(enddate)
+    daterange = pd.date_range(start=startdate, end=enddate1, freq='3H')
     # df_datetime = daterange.to_frame(name = 'DateTime')
     df_datetime = daterange.to_frame(name = 'date_and_time')
-    df_time = prediction.getdatevalue(df_datetime)
+    df_datetime = df_datetime[:-1]
+
+    df_time = prediction.getdatevalue(df_datetime) #predict data
 
     input_data = pd.concat([df, df_time], ignore_index=True)
     input_data = prediction.getoldpassenger(input_data,df,df_time)
 
-    df_train = prediction.select_time(input_data,'2015-01-01','2019-12-31')
-    df_train = df_train[df_train.PASSENGER != 0]
-    df_train = df_train.dropna()
+    #df_train = prediction.select_time(input_data,'2015-01-01','2019-12-31')
+    df_train = input_data[8766:8766+14608]
+    #df_train = df_train[df_train.PASSENGER != 0]
+    df_train = df_train.fillna(0)
 
     df_predict = input_data.set_index('date_and_time')
-    df_predict = df_predict.loc[startdate:enddate]
+    df_predict = df_predict[23374:]
     df_predict = df_predict.drop('PASSENGER',axis=1)
-    df_predict = df_predict.dropna()
-    df_predict = df_predict[df_predict.Previous != 0]
+    df_predict = df_predict.fillna(0)
 
     predict = prediction.randomforest(df_train,df_predict,gen)
     predict = predict.reset_index()
@@ -370,22 +375,22 @@ def modelpredict():
 
     fig = px.line(data_frame = predict, 
     x = 'date_and_time', 
-    y = 'Predict',
-    title = 'Passengers Prediction from {startdate} to {enddate} |')
+    y = 'Predict',color_discrete_sequence=['orange']
+    )
 
     fig.update_layout(
     showlegend=True, modebar_remove=True,hovermode='closest',
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
     font=dict(size=14,color="Black",family='Open Sans, monospace'),
     hoverlabel=dict(bgcolor="white",font_size=16),
-    title_text=f"Passengers Prediction from {startdate} to {enddate} |",title_x=0.5)
+    title_text=f"{airport_name} Passengers Prediction from {startdate} to {enddate} | {inout_p3}",title_x=0.5)
     fig.update_xaxes(title = 'Date',title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     fig.update_yaxes(title = 'Passenger',title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     #predict_json = predict.to_json(orient="split")
-    return render_template("plotly_part3.html",graphJSON = graphJSON, label_date=label_date, inout_p3 = inout_p3, predictvalue=predictvalue, predictdate=predictdate)
-    #return ans.to_html()
+    return render_template("plotly_part3.html",graphJSON = graphJSON, label_date=label_date, inout_p3 = inout_p3, predictvalue=predictvalue, predictdate=predictdate,airport_data3 = airport_data3)
+    #return df_train.to_html()
 
 @app.route('/callback1', methods=['POST', 'GET'])
 def cb3():
@@ -395,6 +400,7 @@ def cb3():
     inout_p3 = request.args.get('data2')
     data_date = request.args.getlist('data3[]')
     data_predict = request.args.getlist('data4[]')
+    airport_data3 = request.args.get('data5')
     
     #data = request.args.get('data3')
     # print('StartDate',start_date)
@@ -405,16 +411,16 @@ def cb3():
     #print('********************', list(data_list))
 
     #print('===============',type(test), start_date,end_date)
-    return update_graph3(start_date,end_date,inout_p3,data_date,data_predict)
+    return update_graph3(start_date,end_date,inout_p3,data_date,data_predict,airport_data3)
     
-def update_graph3(startdate,enddate,inout_p3,data_date,data_predict):
+def update_graph3(startdate,enddate,inout_p3,data_date,data_predict,airport_data3):
     
     
     # if inout_p3 == 'Arrival':
     #     data_test = data_in
     # else:
     #     data_test = data_out
-
+    airport_name = capacity_insert.format_airport(airport_data3)
     # data = data_test
     zipped = list(zip(data_date,data_predict))
     pre = pd.DataFrame(zipped, columns=['DateTime', 'Passenger'])
@@ -424,14 +430,19 @@ def update_graph3(startdate,enddate,inout_p3,data_date,data_predict):
     list_date = list(pre.Date.unique())
 
 
-    fig1 = px.line(pre, x="DateTime", y="Passenger",title = f'Passengers Prediction from {startdate} to {enddate} |')
+    fig1 = px.line(pre, x="DateTime", y="Passenger",color_discrete_sequence=['orange'])
     
     # fig.update_layout(
     # showlegend=True, modebar_remove=True,hovermode='closest',
     # legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
     # font=dict(size=14,color="Black",family='Open Sans, monospace'),
     # hoverlabel=dict(bgcolor="white",font_size=16))
-
+    fig1.update_layout(
+    showlegend=True, modebar_remove=True,hovermode='closest',
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+    font=dict(size=14,color="Black",family='Open Sans, monospace'),
+    hoverlabel=dict(bgcolor="white",font_size=16),
+    title_text=f"{airport_name} Passengers Prediction from {startdate} to {enddate} | {inout_p3}",title_x=0.5)
     fig1.update_xaxes(type ='date', range=[startdate,list_date[list_date.index(enddate)+1]],title = 'Date',title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     fig1.update_yaxes(title = 'Passenger',title_font=dict(size=18,color="Black"),tickfont=dict(size=16,color='Black',family='Open Sans, monospace'))
     graphJSON1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)

@@ -4,10 +4,8 @@ import pandas as pd
 
 mongoClient = MongoClient('mongodb://localhost:27017')
 db = mongoClient.get_database('sample1')
-data_sample = db.get_collection('data')
+data_sample = db.get_collection('database')
 
-factor = db.get_collection('factor')
-factor_date = db.get_collection('factor_date')
 
 def import_data(groups):
     test = data_sample.find({"ARR_DEP (groups)": groups})
@@ -16,17 +14,7 @@ def import_data(groups):
     #df_list.rename(columns={"AirportNameTH.1": "AirportNameTH_O","ARR_DEP (groups)" : "ARR_DEP_Groups"},inplace =True)
     df = df_list.drop([
     '_id',
-    'FLIGHT_NO', 
-    'PORT_NAME',
-    'Country Airline',
-    'CITY',
-    'Destination Country',
-    'จำนวนนับของ ARR_DEP (groups)',
-    'PASSENGER_TRANSFER',
-    'PASSENGER_TRANSIT',
-    'FREIGHT',
-    'TRAFF_TYPE',
-    'CARD_NO'],
+    'PORT_NAME',],
      axis=1)
 
     dff = df[(df.TraffTypeDescTH == 'เที่ยวบินประจำภายในประเทศ')]

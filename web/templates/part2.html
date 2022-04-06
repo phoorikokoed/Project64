@@ -13,7 +13,7 @@
 <body>
   <br>
   <div class="container">
-    <div class="title">Input date to Spill analysis</div>
+    <div class="title">Fill in details to analyze spill</div>
       <form action="{{url_for('display2')}}" method = "post">
         <div class = 'user-detail'>
           <div class="input-box">
@@ -33,7 +33,7 @@
             </select>
           </div>
           <div class="input-box">
-            <span class="details"><b>กรุณาเลือกสนามบิน:</b></span>
+            <span class="details"><b>Please select an airport:</b></span>
             <select name="airport_data" id="airport_data" required="required">
               <option selected>----</option>
               {% for ld in airport %}

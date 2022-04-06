@@ -1,15 +1,21 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 import numpy as np
 
+def plusdate(enddate):
+    enddate = datetime.strptime(enddate, '%Y-%m-%d') #convert from str to datetime
+    d = enddate + timedelta(days=1) # plus one day
+    dateStr = d.strftime("%Y-%m-%d")
+    return dateStr
+
 def select_time(df,start_date,end_date):
     df = df.set_index('date_and_time')
     dataframe = df.loc[start_date:end_date]
-    dataframe = dataframe[dataframe.PASSENGER != 0]
-    dataframe = dataframe.dropna()
+    #dataframe = dataframe[dataframe.PASSENGER != 0]
+    dataframe = dataframe.fillna(0)
     dataframe = dataframe.reset_index()
     return dataframe
 
@@ -50,16 +56,23 @@ def getdatevalue(df):
     return df
 
 def resam(dataframe):
-    test_df = dataframe.resample('6H')["PASSENGER"].sum().dropna()
+    test_df = dataframe.resample('3H')["PASSENGER"].sum().dropna()
     df = test_df.to_frame(name = 'PASSENGER')
     df.reset_index(inplace=True)
     return df
 
 def getoldpassenger(df,df1,df2):
     diff = df2.Year.max() - df1.Year.max()
-    df['Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff)
-    df['2Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff+1)
-    df['3Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff+2)
+    if diff > 0:
+      df['Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff)
+      df['2Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff+1)
+      df['3Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff+2)
+      df['4Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = diff+3)
+    else:
+      df['Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = 1)
+      df['2Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = 2)
+      df['3Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = 3)
+      df['4Previous'] = df.groupby([df['date_and_time'].dt.month,df['date_and_time'].dt.day,df['date_and_time'].dt.hour])['PASSENGER'].shift(periods = 4)
     #df = df.set_index('date_and_time')
     return df
 

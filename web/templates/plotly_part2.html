@@ -53,10 +53,11 @@
     <div id='chart2' class='chart'”></div>
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+    <hr><br>
+    
     <script type='text/javascript'>
       var graphs = {{graphJSON | safe}};
-      var config = {"displayModeBar": true};
+      var config = {"displayModeBar": false};
       Plotly.setPlotConfig(config);
       Plotly.plot('chart',graphs,{});
     </script>
